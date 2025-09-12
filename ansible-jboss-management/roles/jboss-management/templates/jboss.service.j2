@@ -1,0 +1,14 @@
+[Unit]
+Description=JBoss EAP Domain Mode
+After=network.target
+
+[Service]
+Type=forking
+User={{ jboss_user }}
+Group={{ jboss_group }}
+ExecStart={{ jboss_home }}/bin/domain.sh
+ExecStop={{ jboss_home }}/bin/jboss-cli.sh --connect :shutdown
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+# JBoss EAP startup script for AIX
+JBOSS_HOME={{ jboss_home }}
+JBOSS_USER={{ jboss_user }}
+LOG_FILE={{ jboss_home }}/logs/master.log
+
+# Export necessary variables
+export JAVA_HOME={{ java_home | default('/usr/java8_64') }}
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Change to JBoss user and start the domain
+su - $JBOSS_USER -c "
+cd $JBOSS_HOME
+rm -f $LOG_FILE
+nohup bin/domain.sh --domain-config=domain-cbo.xml --host-config=host-master-cbo-dev.xml > $LOG_FILE 2>&1 &
+"
