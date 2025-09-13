@@ -1,18 +1,34 @@
 ---
-- name: Manage JBoss server group
-  hosts: 10.1.237.222
+- name: Manage JBoss Domain
+  hosts: "{{ target_host }}"   # host or domain controller passed dynamically
   gather_facts: false
   vars:
-    jboss_user: "{{ jboss_user }}"       # dynamic username
-    jboss_pass: "{{ jboss_pass }}"       # dynamic password
+    jboss_user: "{{ jboss_user }}"
+    jboss_pass: "{{ jboss_pass }}"
+    server_group: "{{ server_group | default('') }}"
+    action: "{{ action }}"       # start_profile, stop_profile, start_domain, stop_domain
     jboss_cli: "/u01/T24/JBOSS/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
-    server_group: "{{ server_group }}"   # dynamic server group
 
   tasks:
+
+    # -----------------------------
+    # Start/Stop a server group
+    # -----------------------------
     - name: Start servers in server group
       command: "{{ jboss_cli }} --command='/server-group={{ server_group }}:start-servers()'"
-      tags: start_profile
+      when: action == "start_profile"
 
     - name: Stop servers in server group
       command: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
-      tags: stop_profile
+      when: action == "stop_profile"
+
+    # -----------------------------
+    # Start/Stop the whole domain
+    # -----------------------------
+    - name: Start all servers in domain
+      command: "{{ jboss_cli }} --command='/host={{ target_host }}:start-servers()'"
+      when: action == "start_domain"
+
+    - name: Stop all servers in domain
+      command: "{{ jboss_cli }} --command='/host={{ target_host }}:stop-servers()'"
+      when: action == "stop_domain"
