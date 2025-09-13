@@ -24,29 +24,3 @@
     - name: Stop servers in server group
       shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
       when: action == "stop_profile"
-
-    # -----------------------------
-    # Stop the whole domain safely
-    # -----------------------------
-    - name: Stop entire domain safely
-      shell: |
-        PIDS=$(ps -ef | grep jboss | awk '{print $2}')
-        if [ -n "$PIDS" ]; then
-          echo "$PIDS" | xargs kill -9
-        else
-          echo "No JBoss domain process found"
-        fi
-      ignore_errors: yes
-      when: action == "stop_domain"
-
-    # -----------------------------
-    # Start the whole domain
-    # -----------------------------
-    - name: Start entire domain
-      shell: "nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &"
-      args:
-        chdir: "{{ jboss_home }}/bin"
-      async: 0
-      poll: 0
-      when: action == "start_domain"
-
