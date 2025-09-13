@@ -6,9 +6,7 @@
     jboss_user: "{{ jboss_user }}"
     jboss_pass: "{{ jboss_pass }}"
     server_group: "{{ server_group | default('') }}"
-    action: "{{ action }}" # start_profile / stop_profile / start_domain / stop_domain
-    domain_config: "{{ domain_config | default('domain-cbo.xml') }}"
-    host_config: "{{ host_config | default('host-master-cbo-dev.xml') }}"
+    action: "{{ action }}" # start_profile / stop_profile
     jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
 
   tasks:
@@ -23,5 +21,6 @@
     - name: Stop servers in server group
       shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
       when: action == "stop_profile"
+
 
 
