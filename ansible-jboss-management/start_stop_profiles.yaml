@@ -4,28 +4,44 @@
   gather_facts: false
   vars:
     jboss_home: "/u01/T24/JBOSS"
-    domain_config: "{{ domain_config | default('domain-cbo.xml') }}"
-    host_config: "{{ host_config | default('host-master-cbo-dev.xml') }}"
-    action: "{{ action }}"
-    server_group: "{{ server_group | default('') }}"
     jboss_user: "{{ jboss_user }}"
     jboss_pass: "{{ jboss_pass }}"
+    server_group: "{{ server_group | default('') }}"
+    action: "{{ action }}" # start_profile / stop_profile / start_domain / stop_domain
+    domain_config: "{{ domain_config | default('domain-cbo.xml') }}"
+    host_config: "{{ host_config | default('host-master-cbo-dev.xml') }}"
+    jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
 
   tasks:
 
-    - name: Stop server group
-      shell: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect --command='/server-group={{ server_group }}:stop-servers()'"
-      when: action == "stop_profile"
-
-    - name: Start server group
-      shell: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect --command='/server-group={{ server_group }}:start-servers()'"
+    # -----------------------------
+    # Start/Stop a server group
+    # -----------------------------
+    - name: Start servers in server group
+      shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:start-servers()'"
       when: action == "start_profile"
 
-    - name: Stop entire domain via kill
-      shell: "ps -ef | grep jboss | awk '{print $2}' | xargs kill -9"
+    - name: Stop servers in server group
+      shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
+      when: action == "stop_profile"
+
+    # -----------------------------
+    # Stop the whole domain safely
+    # -----------------------------
+    - name: Stop entire domain safely
+      shell: |
+        PIDS=$(ps -ef | grep jboss | awk '{print $2}')
+        if [ -n "$PIDS" ]; then
+          echo "$PIDS" | xargs kill -9
+        else
+          echo "No JBoss domain process found"
+        fi
       when: action == "stop_domain"
 
-    - name: Start entire domain via script
+    # -----------------------------
+    # Start the whole domain
+    # -----------------------------
+    - name: Start entire domain
       shell: "nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &"
       args:
         chdir: "{{ jboss_home }}/bin"
