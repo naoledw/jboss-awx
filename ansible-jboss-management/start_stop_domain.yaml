@@ -1,0 +1,39 @@
+---
+- name: Manage JBoss Domain
+  hosts: "{{ target_host }}"
+  gather_facts: false
+  vars:
+    jboss_home: "/u01/T24/JBOSS"
+    jboss_user: "{{ jboss_user }}"
+    jboss_pass: "{{ jboss_pass }}"
+    action: "{{ action }}" # start_profile / stop_profile / start_domain / stop_domain
+    domain_config: "{{ domain_config | default('domain-cbo.xml') }}"
+    host_config: "{{ host_config | default('host-master-cbo-dev.xml') }}"
+    jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
+
+  tasks:
+
+    # -----------------------------
+    # Stop the whole domain safely
+    # -----------------------------
+    - name: Stop entire domain safely
+      shell: |
+        PIDS=$(ps -ef | grep jboss | awk '{print $2}')
+        if [ -n "$PIDS" ]; then
+          echo "$PIDS" | xargs kill -9
+        else
+          echo "No JBoss domain process found"
+        fi
+      ignore_errors: yes
+      when: action == "stop_domain"
+
+    # -----------------------------
+    # Start the whole domain
+    # -----------------------------
+    - name: Start entire domain
+      shell: "nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &"
+      args:
+        chdir: "{{ jboss_home }}/bin"
+      async: 0
+      poll: 0
+      when: action == "start_domain"
