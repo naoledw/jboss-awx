@@ -1,5 +1,5 @@
 ---
-- name: Manage JBoss Domain
+- name: Manage JBoss Profiles
   hosts: "{{ target_host }}"
   gather_facts: false
   vars:
@@ -24,3 +24,4 @@
     - name: Stop servers in server group
       shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
       when: action == "stop_profile"
+
