@@ -1,0 +1,16 @@
+---
+- name: Manage JBoss server group
+  hosts: 10.1.237.222
+  gather_facts: false
+  vars:
+    jboss_cli: "/u01/T24/JBOSS/bin/jboss-cli.sh --connect"
+    server_group: Browser-server-group   # change to your group name
+
+  tasks:
+    - name: Start servers in server group
+      command: "{{ jboss_cli }} --command='/server-group={{ server_group }}:start-servers()'"
+      tags: start_profile
+
+    - name: Stop servers in server group
+      command: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
+      tags: stop_profile
