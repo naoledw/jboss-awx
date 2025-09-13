@@ -3,8 +3,10 @@
   hosts: 10.1.237.222
   gather_facts: false
   vars:
-    jboss_cli: "/u01/T24/JBOSS/bin/jboss-cli.sh --user=zerihun --password=zerihun --connect"
-    server_group: Browser-server-group   # change to your group name
+    jboss_user: "{{ jboss_user }}"       # dynamic username
+    jboss_pass: "{{ jboss_pass }}"       # dynamic password
+    jboss_cli: "/u01/T24/JBOSS/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
+    server_group: "{{ server_group }}"   # dynamic server group
 
   tasks:
     - name: Start servers in server group
@@ -14,4 +16,3 @@
     - name: Stop servers in server group
       command: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
       tags: stop_profile
-
