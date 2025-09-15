@@ -5,6 +5,8 @@
   vars:
     jboss_home: "/u01/T24/JBOSS"
     action: "{{ action }}" # stop_domain / start_domain
+    ansible_shell_executable: /bin/sh
+    ansible_python_interpreter: /bin/false
 
   tasks:
 
