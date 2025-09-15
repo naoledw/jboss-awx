@@ -29,8 +29,8 @@
     # -----------------------------
     # Start the entire domain
     # -----------------------------
-    - name: Start entire domain
+    - name: Start entire domain with domain-start.sh
       raw: |
-        cd {{ jboss_home }}/bin
-        nohup domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} > /dev/null 2>&1 &
+        cd {{ jboss_home }}
+        nohup ./domain-start.sh > /dev/null 2>&1 &
       when: action == "start_domain"
