@@ -3,7 +3,7 @@
   hosts: artemis_servers
   become: yes
   vars:
-    action: start   # can be start, stop, or restart
+    action: "{{ action }}"   # can be start, stop, or restart
 
   tasks:
     - name: Start Artemis
