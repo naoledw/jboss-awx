@@ -28,5 +28,5 @@
     # Start the entire domain
     # -----------------------------
     - name: Start entire JBoss domain using wrapper script
-      raw: "{{ jboss_home }}/start-domain.sh {{ domain_config }} {{ host_config }}"
+      raw: "{{ jboss_home }}/domain-start.sh {{ domain_config }} {{ host_config }}"
       when: action == "start_domain"
