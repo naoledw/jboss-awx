@@ -17,3 +17,7 @@
     - name: Restart Artemis
       ansible.builtin.command: systemctl restart artemis
       when: action == "restart"
+
+    - name: Check Status
+      ansible.builtin.command: systemctl status artemis
+      when: action == "status"
