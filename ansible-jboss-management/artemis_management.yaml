@@ -1,0 +1,19 @@
+---
+- name: Manage ActiveMQ Artemis
+  hosts: artemis_servers
+  become: yes
+  vars:
+    action: start   # can be start, stop, or restart
+
+  tasks:
+    - name: Start Artemis
+      ansible.builtin.command: systemctl start artemis
+      when: action == "start"
+
+    - name: Stop Artemis
+      ansible.builtin.command: systemctl stop artemis
+      when: action == "stop"
+
+    - name: Restart Artemis
+      ansible.builtin.command: systemctl restart artemis
+      when: action == "restart"
