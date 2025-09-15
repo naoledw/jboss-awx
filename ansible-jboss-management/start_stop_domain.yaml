@@ -1,25 +1,21 @@
 ---
-- name: Manage JBoss Domain
+- name: Manage JBoss Domain without Python
   hosts: "{{ target_host }}"
   gather_facts: false
   vars:
     jboss_home: "/u01/T24/JBOSS"
-    jboss_user: "{{ jboss_user }}"
-    jboss_pass: "{{ jboss_pass }}"
-    action: "{{ action }}" # start_domain / stop_domain
+    action: "{{ action }}"            # start_domain / stop_domain
     domain_config: "{{ domain_config }}"
     host_config: "{{ host_config }}"
-    jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
-    ansible_python_interpreter: "/bin/sh"
 
   tasks:
 
     # -----------------------------
-    # Stop the whole domain safely
+    # Stop the entire domain safely
     # -----------------------------
-    - name: Stop entire domain safely
-      shell: |
-        PIDS=$(ps -ef | grep jboss | awk '{print $2}')
+    - name: Stop entire JBoss domain
+      raw: |
+        PIDS=$(ps -ef | grep jboss | grep -v grep | awk '{print $2}')
         if [ -n "$PIDS" ]; then
           echo "$PIDS" | xargs kill -9
         else
@@ -29,10 +25,10 @@
       when: action == "stop_domain"
 
     # -----------------------------
-    # Start the whole domain
+    # Start the entire domain
     # -----------------------------
-    - name: Start entire domain
-      shell: "nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &"
+    - name: Start entire JBoss domain
+      raw: nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &
       args:
         chdir: "{{ jboss_home }}/bin"
       async: 0
