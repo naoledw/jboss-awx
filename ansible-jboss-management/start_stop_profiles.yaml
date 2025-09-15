@@ -9,7 +9,7 @@
     server_group: "{{ server_group | default('') }}"
     action: "{{ action }}" # start_profile / stop_profile
     jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
-    ansible_python_interpreter: /bin/sh
+    ansible_python_interpreter: "/bin/sh"
 
   tasks:
 
@@ -23,6 +23,7 @@
     - name: Stop servers in server group
       shell: "{{ jboss_cli }} --command='/server-group={{ server_group }}:stop-servers()'"
       when: action == "stop_profile"
+
 
 
 
