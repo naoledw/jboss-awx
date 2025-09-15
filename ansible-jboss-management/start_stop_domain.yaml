@@ -7,8 +7,8 @@
     jboss_user: "{{ jboss_user }}"
     jboss_pass: "{{ jboss_pass }}"
     action: "{{ action }}" # start_domain / stop_domain
-    domain_config: "{{ domain_config | default('domain-cbo.xml') }}"
-    host_config: "{{ host_config | default('host-master-cbo-dev.xml') }}"
+    domain_config: "{{ domain_config }}"
+    host_config: "{{ host_config }}"
     jboss_cli: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect"
     ansible_python_interpreter: "/bin/sh"
 
