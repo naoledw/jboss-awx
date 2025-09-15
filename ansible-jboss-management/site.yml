@@ -4,7 +4,7 @@
   collections:
     - middleware_automation.jboss_eap
   vars:
-    jboss_controller: "{{ controller | default('10.1.237.222:9990') }}"
+    jboss_controller: "{{ controller }}"
     jboss_user: "{{ user | default('zerihun') }}"
     jboss_password: "{{ password | default('zerihun') }}"
   tasks:
