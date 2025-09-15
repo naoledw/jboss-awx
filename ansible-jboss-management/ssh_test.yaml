@@ -1,6 +1,12 @@
 ---
-- hosts: all
+- name: Test SSH connectivity to JBoss servers
+  hosts: jboss_servers
   gather_facts: false
   tasks:
-    - name: Test SSH connection
+    - name: Test SSH connection by running whoami
       command: whoami
+      register: ssh_test
+
+    - name: Show SSH test result
+      debug:
+        msg: "SSH works! Connected as: {{ ssh_test.stdout }}"
