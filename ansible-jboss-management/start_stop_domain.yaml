@@ -1,10 +1,10 @@
 ---
-- name: Manage JBoss Domain without Python
+- name: Manage JBoss Domain (stop/start)
   hosts: "{{ target_host }}"
   gather_facts: false
   vars:
     jboss_home: "/u01/T24/JBOSS"
-    action: "{{ action }}"            # start_domain / stop_domain
+    action: "{{ action }}"          # stop_domain / start_domain
     domain_config: "{{ domain_config }}"
     host_config: "{{ host_config }}"
 
@@ -27,10 +27,6 @@
     # -----------------------------
     # Start the entire domain
     # -----------------------------
-    - name: Start entire JBoss domain
-      raw: nohup {{ jboss_home }}/bin/domain.sh --domain-config={{ domain_config }} --host-config={{ host_config }} &
-      args:
-        chdir: "{{ jboss_home }}/bin"
-      async: 0
-      poll: 0
+    - name: Start entire JBoss domain using wrapper script
+      raw: "{{ jboss_home }}/bin/start-domain.sh {{ domain_config }} {{ host_config }}"
       when: action == "start_domain"
