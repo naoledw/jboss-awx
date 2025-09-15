@@ -1,6 +1,6 @@
 ---
 - name: Manage ActiveMQ Artemis
-  hosts: artemis_servers
+  hosts: "{{ target_host }}"
   become: yes
   vars:
     action: "{{ action }}"   # can be start, stop, or restart
