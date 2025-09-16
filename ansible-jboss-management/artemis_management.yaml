@@ -3,4 +3,4 @@
   become: yes
   tasks:
     - name: Run Artemis action via script
-      command: "/u01/artemis/mastermq/bin/artemis_manage.sh {{ action }}"
+      command: "sh /u01/artemis/mastermq/bin/artemis_manage.sh {{ action }}"
