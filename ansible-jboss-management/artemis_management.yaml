@@ -1,5 +1,5 @@
 ---
-- name: Manage ActiveMQ Artemis
+- name: Manage ActiveMQ Artemis dynamically
   hosts: "{{ target_host }}"
   become: yes
   vars:
@@ -9,11 +9,10 @@
 
     - name: Debug the action variable
       debug:
-        msg: "Action is '{{ action }}' (type={{ action | type_debug }})"
+        msg: "Action is '{{ action }}'"
 
-    # ---------------------------------------
-    # STOP logic (used for stop and restart)
-    - name: Stop Artemis if action is stop or restart
+    # STOP logic (for stop or restart)
+    - name: Stop Artemis safely
       when: action in ["stop", "restart"]
       ansible.builtin.systemd:
         name: artemis
@@ -22,18 +21,16 @@
       register: stop_result
       ignore_errors: yes
 
-    # ---------------------------------------
-    # START logic (used for start and restart)
-    - name: Start Artemis if action is start or restart
+    # START logic (for start or restart)
+    - name: Start Artemis safely
       when: action in ["start", "restart"]
       ansible.builtin.systemd:
         name: artemis
         state: started
         force: yes
 
-    # ---------------------------------------
-    # STATUS check (used for any action or standalone status)
-    - name: Check the current status of Artemis
+    # STATUS check
+    - name: Check current status of Artemis
       ansible.builtin.systemd:
         name: artemis
       register: artemis_status
