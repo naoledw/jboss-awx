@@ -1,15 +1,16 @@
 ---
-- name: Manage ActiveMQ Artemis dynamically
+- name: Manage ActiveMQ Artemis
   hosts: "{{ target_host }}"
   become: yes
   vars:
-    action: "{{ action }}" # can be start, stop, restart (pass via AWX extra_vars)
+    action: "{{ action }}"   # pass via AWX extra_vars: start | stop | restart
 
   tasks:
     - name: Perform the requested action on Artemis
       ansible.builtin.systemd:
         name: artemis
         state: "{{ action }}"
+        stop_timeout: 60
 
     - name: Check the current status of Artemis
       ansible.builtin.systemd:
