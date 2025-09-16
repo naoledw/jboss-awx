@@ -1,6 +1,6 @@
 ---
 - name: Manage ActiveMQ Artemis dynamically
-  hosts: hosts: "{{ target_host }}"
+  hosts: "{{ target_host }}"
   become: yes
   vars:
     action: "{{ action }}" # can be start, stop, restart (pass via AWX extra_vars)
