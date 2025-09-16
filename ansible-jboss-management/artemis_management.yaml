@@ -1,23 +1,21 @@
 ---
-- name: Manage ActiveMQ Artemis
-  hosts: "{{ target_host }}"
+- name: Manage ActiveMQ Artemis dynamically
+  hosts: hosts: "{{ target_host }}"
   become: yes
   vars:
-    action: "{{ action }}"   # can be start, stop, or restart
+    action: "{{ action }}" # can be start, stop, restart (pass via AWX extra_vars)
 
   tasks:
-    - name: Start Artemis
-      ansible.builtin.command: systemctl start artemis
-      when: action == "start"
+    - name: Perform the requested action on Artemis
+      ansible.builtin.systemd:
+        name: artemis
+        state: "{{ action }}"
 
-    - name: Stop Artemis
-      ansible.builtin.command: systemctl stop artemis
-      when: action == "stop"
+    - name: Check the current status of Artemis
+      ansible.builtin.systemd:
+        name: artemis
+      register: artemis_status
 
-    - name: Restart Artemis
-      ansible.builtin.command: systemctl restart artemis
-      when: action == "restart"
-
-    - name: Check Status
-      ansible.builtin.command: systemctl status artemis
-      when: action == "status"
+    - name: Report Artemis status
+      debug:
+        msg: "Artemis is currently {{ artemis_status.status.ActiveState }}"
