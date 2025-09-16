@@ -5,7 +5,7 @@
   become: yes   # ensure sudo
   vars:
     action: "{{ action }}" # start | stop | restart | status
-    artemis_script: "/home/awx/artemis_manage.sh"
+    artemis_script: "/home/naole/ansible-jboss-management/artemis_script/artemis_manage.sh"
 
   tasks:
 
