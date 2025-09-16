@@ -4,8 +4,6 @@
   become: yes
   vars:
     action: "{{ action }}"  # start | stop | restart | status
-    stop_timeout: 180       # seconds to wait for stop
-    start_timeout: 180      # seconds to wait for start
 
   tasks:
 
@@ -20,7 +18,6 @@
       ansible.builtin.systemd:
         name: artemis
         state: stopped
-        stop_timeout: "{{ stop_timeout }}"
         force: yes
       register: stop_result
       ignore_errors: yes
@@ -32,7 +29,6 @@
       ansible.builtin.systemd:
         name: artemis
         state: started
-        start_timeout: "{{ start_timeout }}"
         force: yes
 
     # ---------------------------------------
