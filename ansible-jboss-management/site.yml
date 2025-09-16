@@ -1,63 +1,9 @@
----
-- name: Manage JBoss EAP Configuration
-  hosts: jboss
-  collections:
-    - middleware_automation.jboss_eap
-  vars:
-    jboss_controller: "{{ controller }}"
-    jboss_user: "{{ user | default('zerihun') }}"
-    jboss_password: "{{ password | default('zerihun') }}"
+- name: Who am I on the host?
+  hosts: "{{ target_host }}"
   tasks:
+    - name: Show remote user
+      command: whoami
+      register: whoami_out
 
-    - name: Create profile
-      jboss_eap_profile:
-        profile: "{{ profile_name }}"
-        state: present
-        controller: "{{ jboss_controller }}"
-        user: "{{ jboss_user }}"
-        password: "{{ jboss_password }}"
-      when: action == "create_profile"
-
-    - name: Create server group
-      jboss_eap_server_group:
-        name: "{{ server_group }}"
-        profile: "{{ profile_name }}"
-        socket_binding_group: "{{ socket_binding_group | default('standard-sockets') }}"
-        state: present
-        controller: "{{ jboss_controller }}"
-        user: "{{ jboss_user }}"
-        password: "{{ jboss_password }}"
-      when: action == "create_server_group"
-
-    - name: Add datasource
-      jboss_eap_datasource:
-        name: "{{ datasource_name }}"
-        jndi_name: "{{ jndi_name }}"
-        driver_name: "{{ driver_name }}"
-        connection_url: "{{ connection_url }}"
-        user_name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        enabled: true
-        state: present
-        controller: "{{ jboss_controller }}"
-        user: "{{ jboss_user }}"
-        password: "{{ jboss_password }}"
-      when: action == "add_datasource"
-
-    - name: Start server group
-      jboss_eap_server_group:
-        name: "{{ server_group }}"
-        state: started
-        controller: "{{ jboss_controller }}"
-        user: "{{ jboss_user }}"
-        password: "{{ jboss_password }}"
-      when: action == "start_server_group"
-
-    - name: Stop server group
-      jboss_eap_server_group:
-        name: "{{ server_group }}"
-        state: stopped
-        controller: "{{ jboss_controller }}"
-        user: "{{ jboss_user }}"
-        password: "{{ jboss_password }}"
-      when: action == "stop_server_group"
+    - debug:
+        var: whoami_out.stdout
