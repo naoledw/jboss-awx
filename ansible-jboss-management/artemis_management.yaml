@@ -19,5 +19,5 @@
       when: action == "restart"
 
     - name: Check Status
-      ansible.builtin.command: sudo systemctl status artemis
+      ansible.builtin.command: systemctl status artemis
       when: action == "status"
