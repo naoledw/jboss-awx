@@ -1,23 +1,6 @@
----
-- name: Manage Apache ActiveMQ Artemis
+- name: Manage ActiveMQ Artemis
   hosts: "{{ target_host }}"
-  gather_facts: no
-  become: yes   # ensure sudo
-  vars:
-    action: "{{ action }}" # start | stop | restart | status
-    artemis_script: "/home/naole/ansible-jboss-management/artemis_script/artemis_manage.sh"
-
+  become: yes
   tasks:
-
-    - name: Debug the requested action
-      debug:
-        msg: "Requested action: {{ action }}"
-
-    - name: Run Artemis management script
-      ansible.builtin.raw: "{{ artemis_script }} {{ action }}"
-      register: artemis_result
-      ignore_errors: yes
-
-    - name: Show script output
-      debug:
-        msg: "{{ artemis_result.stdout }}"
+    - name: Run Artemis action via script
+      command: "/u01/artemis/mastermq/bin/artemis_manage.sh {{ action }}"
