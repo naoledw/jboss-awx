@@ -1,45 +1,23 @@
 ---
-- name: Manage ActiveMQ Artemis via AWX
+- name: Manage Apache ActiveMQ Artemis
   hosts: "{{ target_host }}"
   gather_facts: no
-  become: yes          # Use sudo
+  become: yes   # ensure sudo
   vars:
-    action: "{{ action }}"   # start | stop | restart | status
-    systemctl_path: "/u01/artemis/mastermq/bin"
+    action: "{{ action }}" # start | stop | restart | status
+    artemis_script: "/home/awx/artemis_manage.sh"
 
   tasks:
 
-    - name: Debug the action
+    - name: Debug the requested action
       debug:
-        msg: "Action requested: {{ action }}"
+        msg: "Requested action: {{ action }}"
 
-    # STOP logic
-    - name: Stop Artemis if needed
-      when: action in ["stop", "restart"]
-      ansible.builtin.systemd:
-        name: artemis
-        state: stopped
-        force: yes
-        executable: "{{ systemctl_path }}"
-      register: stop_result
+    - name: Run Artemis management script
+      ansible.builtin.raw: "{{ artemis_script }} {{ action }}"
+      register: artemis_result
       ignore_errors: yes
 
-    # START logic
-    - name: Start Artemis if needed
-      when: action in ["start", "restart"]
-      ansible.builtin.systemd:
-        name: artemis
-        state: started
-        force: yes
-        executable: "{{ systemctl_path }}"
-
-    # STATUS logic
-    - name: Check Artemis status
-      ansible.builtin.systemd:
-        name: artemis
-        executable: "{{ systemctl_path }}"
-      register: artemis_status
-
-    - name: Report Artemis status
+    - name: Show script output
       debug:
-        msg: "Artemis is currently {{ artemis_status.status.ActiveState }}"
+        msg: "{{ artemis_result.stdout }}"
