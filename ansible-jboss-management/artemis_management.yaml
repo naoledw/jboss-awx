@@ -3,14 +3,36 @@
   hosts: "{{ target_host }}"
   become: yes
   vars:
-    action: "{{ action }}"   # pass via AWX extra_vars: start | stop | restart
+    action: "{{ action }}"          # must be one of "start", "stop", "restart"
+    force_stop_timeout: 60     # seconds to wait before force killing
 
   tasks:
+
+    - name: Debug the action variable
+      debug:
+        msg: "Action is '{{ action }}' (type={{ action | type_debug }})"
+
     - name: Perform the requested action on Artemis
       ansible.builtin.systemd:
         name: artemis
         state: "{{ action }}"
-        stop_timeout: 60
+        stop_timeout: 120
+      register: artemis_action
+      ignore_errors: yes
+
+    - name: Check if Artemis Java process is still running
+      ansible.builtin.command: "pidof java"
+      register: artemis_pid
+      failed_when: false
+      changed_when: false
+
+    - name: Force kill Artemis if still running after stop
+      when:
+        - action == "stop" or action == "restart"
+        - artemis_pid.stdout != ""
+      ansible.builtin.shell: "kill -9 {{ artemis_pid.stdout }}"
+      register: force_kill
+      changed_when: true
 
     - name: Check the current status of Artemis
       ansible.builtin.systemd:
