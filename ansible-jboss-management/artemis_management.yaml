@@ -3,8 +3,9 @@
   hosts: "{{ target_host }}"
   become: yes
   vars:
-    action: "{{ action }}"          # must be one of "start", "stop", "restart"
-    force_stop_timeout: 60     # seconds to wait before force killing
+    action: "{{ action }}"  # start | stop | restart | status
+    stop_timeout: 60        # systemd stop timeout
+    force_stop_timeout: 60  # seconds to wait before force killing
 
   tasks:
 
@@ -12,15 +13,19 @@
       debug:
         msg: "Action is '{{ action }}' (type={{ action | type_debug }})"
 
-    - name: Perform the requested action on Artemis
+    # ---------------------------------------
+    # STOP logic (used for stop and restart)
+    - name: Stop Artemis if action is stop or restart
+      when: action in ["stop", "restart"]
       ansible.builtin.systemd:
         name: artemis
-        state: "{{ action }}"
-        stop_timeout: 120
-      register: artemis_action
+        state: stopped
+        stop_timeout: "{{ stop_timeout }}"
+      register: stop_result
       ignore_errors: yes
 
     - name: Check if Artemis Java process is still running
+      when: action in ["stop", "restart"]
       ansible.builtin.command: "pidof java"
       register: artemis_pid
       failed_when: false
@@ -28,12 +33,23 @@
 
     - name: Force kill Artemis if still running after stop
       when:
-        - action == "stop" or action == "restart"
+        - action in ["stop", "restart"]
         - artemis_pid.stdout != ""
       ansible.builtin.shell: "kill -9 {{ artemis_pid.stdout }}"
       register: force_kill
       changed_when: true
 
+    # ---------------------------------------
+    # START logic (used for start and restart)
+    - name: Start Artemis if action is start or restart
+      when: action in ["start", "restart"]
+      ansible.builtin.systemd:
+        name: artemis
+        state: started
+        daemon_reload: yes
+
+    # ---------------------------------------
+    # STATUS check (used for any action or standalone status)
     - name: Check the current status of Artemis
       ansible.builtin.systemd:
         name: artemis
