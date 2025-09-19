@@ -1,3 +1,0 @@
-JBoss EAP Domain Controller
-startsrc = "{{ jboss_home }}/bin/jboss-aix-start.sh"
-stopsrc = "{{ jboss_home }}/bin/jboss-aix-stop.sh"
