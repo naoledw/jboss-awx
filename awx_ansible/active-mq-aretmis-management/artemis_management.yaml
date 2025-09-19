@@ -1,0 +1,6 @@
+- name: Manage ActiveMQ Artemis
+  hosts: "{{ target_host }}"
+  become: yes
+  tasks:
+    - name: Run Artemis action via script
+      command: "sh /u01/artemis/mastermq/bin/artemis_manage.sh {{ action }}"

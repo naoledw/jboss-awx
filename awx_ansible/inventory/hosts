@@ -1,0 +1,12 @@
+[jboss_masters]
+dc1 ansible_host=10.1.237.222
+
+[jboss_domain:children]
+jboss_masters
+
+[jboss_domain:vars]
+ansible_user=t24user
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+jboss_home=/u01/T24/JBOSS
+jboss_user=t24user
+jboss_group=t24group

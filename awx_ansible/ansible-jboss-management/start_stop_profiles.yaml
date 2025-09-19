@@ -1,0 +1,19 @@
+---
+- name: Manage JBoss server groups without Python
+  hosts: "{{ target_host }}"
+  gather_facts: false
+  vars:
+    jboss_home: "/u01/T24/JBOSS"
+    jboss_user: "{{ jboss_user }}"
+    jboss_pass: "{{ jboss_pass }}"
+    server_group: "{{ server_group }}"
+    action: "{{ action }}"   # start_profile or stop_profile
+
+  tasks:
+    - name: Start servers in server group
+      raw: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect --command='/server-group={{ server_group }}:start-servers()'"
+      when: action == "start_profile"
+
+    - name: Stop servers in server group
+      raw: "{{ jboss_home }}/bin/jboss-cli.sh --user={{ jboss_user }} --password={{ jboss_pass }} --connect --command='/server-group={{ server_group }}:stop-servers()'"
+      when: action == "stop_profile"

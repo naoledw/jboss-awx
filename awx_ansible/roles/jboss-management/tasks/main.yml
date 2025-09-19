@@ -1,0 +1,88 @@
+---
+- name: Ensure JBoss group exists
+  group:
+    name: "{{ jboss_group }}"
+    state: present
+
+- name: Ensure JBoss user exists
+  user:
+    name: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    state: present
+    system: yes
+    create_home: no
+
+- name: Create JBoss installation directory
+  file:
+    path: "{{ jboss_home }}"
+    state: directory
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    mode: '0755'
+
+- name: Check OS family
+  fail:
+    msg: "Unsupported OS family: {{ ansible_os_family }}"
+  when: ansible_os_family != "AIX" and ansible_os_family != "RedHat" and ansible_os_family != "Debian"
+
+- name: Copy AIX startup script
+  template:
+    src: "jboss-aix-start.sh.j2"
+    dest: "{{ jboss_home }}/bin/jboss-aix-start.sh"
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    mode: '0755'
+  when: ansible_os_family == "AIX"
+
+- name: Copy AIX stop script
+  template:
+    src: "jboss-aix-stop.sh.j2"
+    dest: "{{ jboss_home }}/bin/jboss-aix-stop.sh"
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    mode: '0755'
+  when: ansible_os_family == "AIX"
+
+- name: Ensure /etc/rc.subsys directory exists on AIX
+  file:
+    path: /etc/rc.subsys
+    state: directory
+    mode: '0755'
+  when: ansible_os_family == "AIX"
+
+- name: Create SRC subsystem for AIX
+  template:
+    src: "jboss-aix.subsys.j2"
+    dest: "/etc/rc.subsys/jboss-domain"
+    owner: root
+    group: system
+    mode: '0644'
+  when: ansible_os_family == "AIX"
+
+- name: Check if SRC subsystem already exists
+  shell: |
+    lssrc -s jboss-domain >/dev/null 2>&1 && echo "exists" || echo "does not exist"
+  register: src_subsystem_status
+  changed_when: false
+  when: ansible_os_family == "AIX"
+
+- name: Register SRC subsystem on AIX (if not exists)
+  shell: |
+    mkssys -s jboss-domain -p "{{ jboss_home }}/bin/jboss-aix-start.sh" -u {{ jboss_user }} -S -n 15 -f 9
+  when: 
+    - ansible_os_family == "AIX"
+    - src_subsystem_status.stdout == "does not exist"
+
+- name: Start JBoss service on AIX
+  shell: |
+    startsrc -s jboss-domain
+  when: ansible_os_family == "AIX"
+
+- name: Configure domain controller
+  template:
+    src: "host-master.xml.j2"
+    dest: "{{ jboss_home }}/domain/configuration/host-master-cbo-dev.xml"
+    owner: "{{ jboss_user }}"
+    group: "{{ jboss_group }}"
+    mode: '0640'
+  when: inventory_hostname in groups['jboss_masters']

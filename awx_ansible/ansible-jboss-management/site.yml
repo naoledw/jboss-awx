@@ -1,0 +1,9 @@
+- name: Who am I on the host?
+  hosts: "{{ target_host }}"
+  tasks:
+    - name: Show remote user
+      command: whoami
+      register: whoami_out
+
+    - debug:
+        var: whoami_out.stdout
